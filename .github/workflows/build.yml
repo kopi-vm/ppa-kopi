@@ -56,7 +56,6 @@ jobs:
             aptly repo create -distribution="$dist" -component="main" "$REPO_NAME" || echo "Repo $REPO_NAME already exists"
 
             aptly repo add "$REPO_NAME" ./packages/*.deb
-            rm -rf ./packages
 
             if aptly publish list -raw | grep -q "^$dist "; then
               aptly publish update -batch -force-overwrite -gpg-key="$GPG_KEY_ID" -passphrase="$GPG_PASSPHRASSE" "$dist"
@@ -65,6 +64,7 @@ jobs:
             fi
           done
 
+          rm -rf ./packages
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
