@@ -1,0 +1,78 @@
+on:
+  workflow_dispatch:
+
+name: Build PPA Repository
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.aptly/db
+            ~/.aptly/pool
+          key: ${{ runner.os }}-aptly-cache-${{ hashFiles('**/packages.list') }}
+          restore-keys: ${{ runner.os }}-aptly-cache-
+
+      - name: Import GPG key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import
+          echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf
+          gpg-connect-agent reloadagent /bye
+
+      - name: Install aptly
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y aptly
+
+          ln -s ${{ github.workspace }}/docs/ ~/.aptly/public
+
+      - name: Download deb packages
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: 'kopi-vm/kopi'
+          fileName: '*.deb'
+          out-file-path: 'packages/'
+
+      - name: Update Repositories
+        env:
+          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+          GPG_PASSPHRASSE: ${{ secrets.GPG_PASSPHRASSE }}
+        run: |
+          DISTROS="bullseye bookworm jammy noble"
+
+          for dist in $DISTROS; do
+            REPO_NAME="kopi-ppa-$dist"
+
+            aptly repo create -distribution="$dist" -component="main" "$REPO_NAME" || echo "Repo $REPO_NAME already exists"
+
+            aptly repo add "$REPO_NAME" ./packages/*.deb
+            rm -rf ./packages
+
+            if aptly publish list -raw | grep -q "^$dist "; then
+              aptly publish update -batch -force-overwrite -gpg-key="$GPG_KEY_ID" -passphrase="$GPG_PASSPHRASSE" "$dist"
+            else
+              aptly publish repo -gpg-key="$GPG_KEY_ID" -passphrase="$GPG_PASSPHRASSE" "$REPO_NAME"
+            fi
+          done
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Push Changes
+        run: |
+          if ! git diff-index --quiet HEAD; then
+            git add .
+            git commit -m "kopi: Update PPA Repository"
+            git push origin main
+          else
+            echo "PPA Repository has already updated."
+          fi
