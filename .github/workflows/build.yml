@@ -40,6 +40,7 @@ jobs:
         with:
           repository: 'kopi-vm/kopi'
           fileName: '*.deb'
+          latest: true
           out-file-path: 'packages/'
 
       - name: Update Repositories
