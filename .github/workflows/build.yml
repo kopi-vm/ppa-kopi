@@ -21,10 +21,11 @@ jobs:
           restore-keys: ${{ runner.os }}-aptly-cache-
 
       - name: Import GPG key
-        run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import
-          echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf
-          gpg-connect-agent reloadagent /bye
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASSE }}
 
       - name: Install aptly
         run: |
@@ -42,7 +43,7 @@ jobs:
 
       - name: Update Repositories
         env:
-          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+          GPG_KEY_ID: ${{ steps.import_gpg.outputs.fingerprint }}
           GPG_PASSPHRASSE: ${{ secrets.GPG_PASSPHRASSE }}
         run: |
           DISTROS="bullseye bookworm jammy noble"
