@@ -1,0 +1,57 @@
+on:
+  workflow_dispatch:
+
+name: Install Test
+jobs:
+  
+  install:
+    name: Install Test
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: "amd64"
+            version: "21"
+          
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Setup Public Key
+        run: |
+          GPG_FINGERPRINT="D2AC04A5A34E9BE3A8B32784F507C6D3DB058848"
+
+          sudo mkdir -p /root/.gnupg
+          sudo chmod 700 /root/.gnupg
+
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/kopi-keyring.gpg --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys "$GPG_FINGERPRINT"
+
+      - name: Add Repository
+        run: |
+          REPO_URL="https://kopi-vm.github.io/ppa-kopi"
+          KEYRING_PATH="/usr/share/keyrings/kopi-keyring.gpg"
+
+          echo "deb [arch=amd64,arm64 signed-by=${KEYRING_PATH}] ${REPO_URL} $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/kopi.list
+      
+      - name: Update Local Repository
+        run: sudo apt-get update
+
+      - name: Install
+        run: sudo apt-get install kopi
+
+      - name: Setup kopi
+        run: kopi setup
+      
+      - name: Install Java
+        run: kopi install ${{ matrix.version }}
+      
+      - name: Use Java
+        run: kopi global ${{ matrix.version }}
+      
+      - name: Run Java
+        run: |
+          export PATH="~/.kopi/shims:$PATH"
+          ls -al ~/kopi/jdks
+          kopi env
+          kopi current
+          java --version
