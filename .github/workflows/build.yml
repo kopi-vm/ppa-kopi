@@ -61,9 +61,7 @@ jobs:
 
             aptly repo add "$REPO_NAME" ./packages/*.deb
 
-            aptly publish list -raw
-
-            if aptly publish list -raw | grep -q "^${dist}\s+"; then
+            if aptly publish list -raw | grep -q "^\.\s${dist}$"; then
               aptly publish update -batch -force-overwrite -gpg-key="$GPG_KEY_ID" -passphrase="$GPG_PASSPHRASSE" "${dist}"
             else
               aptly publish repo -architectures="$ARCHS" -gpg-key="$GPG_KEY_ID" -passphrase="$GPG_PASSPHRASSE" "$REPO_NAME"
@@ -79,10 +77,9 @@ jobs:
 
       - name: Push Changes
         run: |
-          git status
+          git add .
 
           if ! git diff-index --quiet HEAD; then
-            git add .
             git commit -m "kopi: Update PPA Repository"
             git push origin main
           else
