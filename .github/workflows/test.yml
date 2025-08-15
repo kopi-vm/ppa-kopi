@@ -13,6 +13,21 @@ jobs:
           - os: ubuntu-24.04
             arch: "amd64"
             version: "21"
+          - os: ubuntu-24.04
+            arch: "amd64"
+            version: "zulu@21"
+          - os: ubuntu-24.04
+            arch: "amd64"
+            version: "liberica@17"
+          - os: ubuntu-24.04-arm
+            arch: "arm64"
+            version: "21"
+          - os: ubuntu-24.04-arm
+            arch: "arm64"
+            version: "zulu@21"
+          - os: ubuntu-24.04-arm
+            arch: "arm64"
+            version: "liberica@17"
           
     runs-on: ${{ matrix.os }}
 
@@ -23,7 +38,6 @@ jobs:
 
           sudo mkdir -p /root/.gnupg
           sudo chmod 700 /root/.gnupg
-
           sudo gpg --no-default-keyring --keyring /usr/share/keyrings/kopi-keyring.gpg --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys "$GPG_FINGERPRINT"
 
       - name: Add Repository
@@ -51,7 +65,7 @@ jobs:
       - name: Run Java
         run: |
           export PATH="~/.kopi/shims:$PATH"
-          ls -al ~/kopi/jdks
+          ls -al ~/.kopi/jdks
           kopi env
           kopi current
           java --version
