@@ -52,18 +52,21 @@ jobs:
           GPG_PASSPHRASSE: ${{ secrets.GPG_PASSPHRASSE }}
         run: |
           DISTROS="bullseye bookworm jammy noble"
+          ARCHS="amd64,arm64"
 
           for dist in $DISTROS; do
-            REPO_NAME="kopi-ppa-$dist"
+            REPO_NAME="kopi-ppa-${dist}"
 
-            aptly repo create -distribution="$dist" -component="main" "$REPO_NAME" || echo "Repo $REPO_NAME already exists"
+            aptly repo create -distribution="${dist}" -component="main" "$REPO_NAME" || echo "Repo $REPO_NAME already exists"
 
             aptly repo add "$REPO_NAME" ./packages/*.deb
 
-            if aptly publish list -raw | grep -q "^$dist "; then
-              aptly publish update -batch -force-overwrite -gpg-key="$GPG_KEY_ID" -passphrase="$GPG_PASSPHRASSE" "$dist"
+            aptly publish list -raw
+
+            if aptly publish list -raw | grep -q "^${dist}\s+"; then
+              aptly publish update -batch -force-overwrite -gpg-key="$GPG_KEY_ID" -passphrase="$GPG_PASSPHRASSE" "${dist}"
             else
-              aptly publish repo -gpg-key="$GPG_KEY_ID" -passphrase="$GPG_PASSPHRASSE" "$REPO_NAME"
+              aptly publish repo -architectures="$ARCHS" -gpg-key="$GPG_KEY_ID" -passphrase="$GPG_PASSPHRASSE" "$REPO_NAME"
             fi
           done
 
@@ -77,7 +80,7 @@ jobs:
       - name: Push Changes
         run: |
           git status
-          
+
           if ! git diff-index --quiet HEAD; then
             git add .
             git commit -m "kopi: Update PPA Repository"
