@@ -68,8 +68,6 @@ jobs:
             fi
           done
 
-          rm -rf ./packages
-      
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
@@ -77,7 +75,7 @@ jobs:
 
       - name: Push Changes
         run: |
-          git add .
+          git add docs
 
           if ! git diff-index --quiet HEAD; then
             git commit -m "kopi: Update PPA Repository"
