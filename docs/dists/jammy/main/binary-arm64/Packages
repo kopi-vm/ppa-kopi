@@ -4,13 +4,13 @@ Section: default
 Installed-Size: 9801
 Maintainer: satotaichi <sato.taichi@dentsusoken.com>
 Architecture: arm64
-Version: 0.1.0
-Filename: pool/main/k/kopi/kopi_0.1.0_arm64.deb
-Size: 4763520
-MD5sum: 4cc324e72fbfd05c7e9827b4535918e2
-SHA1: 34d84e59d85f9a33cbe81eb6d2c9715b1ba8ec8b
-SHA256: 04289c3540875d2d3683461296277b6d251d8bdf73a617b19d684c6b1f363430
-SHA512: c68d01f431a46adbc1851a7be58f40c7422dc95834199a8aff4b12c0d0afd067891ce776cf128403743518a5fd910dfa8bd173ef1ff6be98a67587436784cb01
+Version: 0.1.2
+Filename: pool/main/k/kopi/kopi_0.1.2_arm64.deb
+Size: 4767560
+MD5sum: c8806d3a51a98300121bda67bb6a2d9b
+SHA1: a0c906930a3da4598cdad0820720f21ba1f1c905
+SHA256: daee99f130b9be63745f8280b7abfe5689e59a194ea69d280cdf0abd386c57cc
+SHA512: 91e2dce0d1c6babf4937d5d43dee0df861329f421e3aba5b1dd47e5232a90b39d8d84330b5a246ac6e89fa9426898c2d91d7e29491525cc00df6bff1052a33d6
 Description: Kopi is a JDK version management tool
 Homepage: https://kopi-vm.github.io/
 License: Apache-2.0
